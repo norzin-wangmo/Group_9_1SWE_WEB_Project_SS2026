@@ -1,20 +1,20 @@
 "use client";
 
-import { useProductStore } from "../store/productStore";
+import CategoryBar from "../components/CategoryBar";
 import ProductCard from "../components/ProductCard";
+import { useProductStore } from "../store/productStore";
 
 export default function Home() {
-  const products = useProductStore((state) => state.products);
+  const products = useProductStore((state) => 
+    state.getFilteredProducts());
 
   return (
     <div>
-      <h1> EasyBuy Marketplace</h1>
+      <h1>EasyBuy Marketplace</h1>
 
-      <div style={{
-        display: "flex",
-        gap: "20px",
-        flexWrap: "wrap"
-      }}>
+      <CategoryBar/>
+
+      <div>
         {products.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
