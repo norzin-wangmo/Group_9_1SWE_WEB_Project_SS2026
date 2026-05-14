@@ -33,7 +33,7 @@ export default function Navbar() {
 
     <nav className="flex items-center justify-between border-b bg-white px-6 py-4">
 
-      {/* Logo */}
+      {/* Left Logo */}
       <Link
         href="/"
         className="text-2xl font-bold text-blue-700"
@@ -41,34 +41,48 @@ export default function Navbar() {
         EasyBuy
       </Link>
 
-      {/* Middle Navigation */}
-      <div className="flex items-center gap-5 text-sm font-medium">
+      {/* Middle Categories */}
+      <div className="flex items-center gap-6 text-sm font-medium">
 
-        <Link href="/">
-          Home
+        <Link
+          href="/products"
+          className="transition hover:text-blue-700 hover:underline"
+        >
+          All
         </Link>
 
-        <Link href="/products">
-          Products
-        </Link>
-
-        <Link href="/products?category=Electronics">
+        <Link
+          href="/products?category=Electronics"
+          className="transition hover:text-blue-700 hover:underline"
+        >
           Electronics
         </Link>
 
-        <Link href="/products?category=Furniture">
+        <Link
+          href="/products?category=Furniture"
+          className="transition hover:text-blue-700 hover:underline"
+        >
           Furniture
         </Link>
 
-        <Link href="/products?category=Clothing">
+        <Link
+          href="/products?category=Clothing"
+          className="transition hover:text-blue-700 hover:underline"
+        >
           Clothing
         </Link>
 
-        <Link href="/products?category=Sports">
+        <Link
+          href="/products?category=Sports"
+          className="transition hover:text-blue-700 hover:underline"
+        >
           Sports
         </Link>
 
-        <Link href="/products?category=Books">
+        <Link
+          href="/products?category=Books"
+          className="transition hover:text-blue-700 hover:underline"
+        >
           Books
         </Link>
 
@@ -79,14 +93,20 @@ export default function Navbar() {
 
         <button
           onClick={handleSellItem}
-          className="rounded-lg bg-blue-700 px-4 py-2 text-white"
+          className="
+            rounded-lg bg-blue-700 px-4 py-2 text-white
+            transition hover:bg-blue-800
+          "
         >
           Sell Item
         </button>
 
         <Link
           href="/login"
-          className="rounded-lg border px-4 py-2"
+          className="
+            rounded-lg border px-4 py-2
+            transition hover:bg-slate-100
+          "
         >
           Login
         </Link>
