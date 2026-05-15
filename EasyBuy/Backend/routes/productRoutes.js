@@ -1,26 +1,23 @@
 const express = require('express');
-
 const router = express.Router();
+const {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getMyProducts,
+} = require('../controllers/productController');
+const { protect } = require('../middleware/authMiddleware');
 
-// Product routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Get all products' });
-});
+// Public routes
+router.get('/', getAllProducts);
+router.get('/:id', getProductById);
 
-router.get('/:id', (req, res) => {
-  res.json({ message: `Get product with id ${req.params.id}` });
-});
-
-router.post('/', (req, res) => {
-  res.json({ message: 'Create new product' });
-});
-
-router.put('/:id', (req, res) => {
-  res.json({ message: `Update product with id ${req.params.id}` });
-});
-
-router.delete('/:id', (req, res) => {
-  res.json({ message: `Delete product with id ${req.params.id}` });
-});
+// Protected routes (must be logged in)
+router.get('/user/my', protect, getMyProducts);
+router.post('/', protect, createProduct);
+router.put('/:id', protect, updateProduct);
+router.delete('/:id', protect, deleteProduct);
 
 module.exports = router;

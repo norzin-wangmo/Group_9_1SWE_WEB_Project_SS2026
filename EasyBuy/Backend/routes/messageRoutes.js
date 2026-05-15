@@ -1,18 +1,23 @@
 const express = require('express');
-
 const router = express.Router();
+const {
+  sendMessage,
+  getInbox,
+  getSent,
+  getConversation,
+  deleteMessage,
+  getUnreadCount,
+} = require('../controllers/messageController');
+const { protect } = require('../middleware/authMiddleware');
 
-// Message routes
-router.get('/', (req, res) => {
-  res.json({ message: 'Get all messages' });
-});
+// All message routes require authentication
+router.use(protect);
 
-router.post('/', (req, res) => {
-  res.json({ message: 'Send new message' });
-});
-
-router.get('/:id', (req, res) => {
-  res.json({ message: `Get message with id ${req.params.id}` });
-});
+router.post('/', sendMessage);
+router.get('/inbox', getInbox);
+router.get('/sent', getSent);
+router.get('/unread-count', getUnreadCount);
+router.get('/conversation/:userId', getConversation);
+router.delete('/:id', deleteMessage);
 
 module.exports = router;
