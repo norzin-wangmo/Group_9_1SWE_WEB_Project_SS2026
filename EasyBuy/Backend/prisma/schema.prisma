@@ -1,3 +1,6 @@
+// This is your Prisma schema file.
+// Run: npx prisma migrate dev --name init
+
 generator client {
   provider = "prisma-client-js"
 }
