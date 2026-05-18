@@ -1,156 +1,90 @@
-# EasyBuy Backend API
+# Backend 
+---
 
-Node.js + Express + PostgreSQL (Prisma) + JWT Authentication
+## What's included
+
+| File | Purpose |
+|---|---|
+| `prisma/schema.prisma` | **Replace** your existing schema — adds 4 new tables + 3 enums |
+| `src/controllers/notificationController.js` | New |
+| `src/controllers/paymentController.js` | New |
+| `src/controllers/approvalController.js` | New |
+| `src/routes/notificationRoutes.js` | New |
+| `src/routes/paymentRoutes.js` | New |
+| `src/routes/approvalRoutes.js` | New |
+| `src/validation/schemas.js` | **Replace** — adds 3 new Zod schemas |
+| `src/server.js` | **Replace** — registers 3 new route groups |
 
 ---
 
-## 📁 Project Structure
+## New database tables
 
-```
-easybuy-backend/
-├── prisma/
-│   ├── schema.prisma        # Database models
-│   └── seed.js              # Sample data seeder
-├── src/
-│   ├── controllers/
-│   │   ├── authController.js
-│   │   ├── productController.js
-│   │   └── messageController.js
-│   ├── middleware/
-│   │   ├── authMiddleware.js   # JWT protect + adminOnly
-│   │   └── errorMiddleware.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── productRoutes.js
-│   │   └── messageRoutes.js
-│   ├── utils/
-│   │   ├── prisma.js          # Prisma client singleton
-│   │   └── jwt.js             # Token helpers
-│   └── server.js
-├── .env.example
-├── .gitignore
-└── package.json
-```
+| Table | Description |
+|---|---|
+| `notifications` | In-app notifications per user (type, title, body, isRead, link) |
+| `payments` | Payment records for listing/upload fees |
+| `upload_requests` | Seller submits a request to publish a product |
+| `admin_reviews` | Admin approve/reject decision linked to an upload request |
 
 ---
 
-## ⚙️ Setup Instructions
+## How to apply
 
-### 1. Prerequisites
-- Node.js v18+
-- PostgreSQL installed and running
+1. Copy all files into your `EasyBuy/Backend/` folder, replacing files where noted above.
 
-### 2. Install dependencies
-```bash
-cd EasyBuy/Backend
-npm install
-```
+2. Run the Prisma migration:
+   ```bash
+   npx prisma migrate dev --name add_notifications_payments_approvals
+   ```
 
-### 3. Configure environment
-```bash
-# Copy the example file
-cp .env.example .env
-```
+3. Regenerate the Prisma client:
+   ```bash
+   npx prisma generate
+   ```
 
-Edit `.env` with your PostgreSQL credentials:
-```env
-DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/easybuy_db"
-JWT_SECRET="any_long_random_secret_string_here"
-JWT_EXPIRES_IN="7d"
-PORT=5000
-CLIENT_URL="http://localhost:3000"
-```
-
-### 4. Create the database
-In psql or pgAdmin, create the database:
-```sql
-CREATE DATABASE easybuy_db;
-```
-
-### 5. Run Prisma migrations
-```bash
-npm run db:generate   # Generate Prisma client
-npm run db:migrate    # Apply schema to database (name: init)
-```
-
-### 6. (Optional) Seed sample data
-```bash
-npm run db:seed
-```
-This creates:
-- Admin: `admin@easybuy.com` / `admin123`
-- User:  `user@easybuy.com`  / `user123`
-- 3 sample products + 1 message
-
-### 7. Start the server
-```bash
-npm run dev     # Development (auto-restarts with nodemon)
-npm start       # Production
-```
-
-Server runs at: `http://localhost:5000`
+4. Restart your dev server:
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints added
 
-### Auth — `/api/auth`
-| Method | Endpoint       | Auth | Description         |
-|--------|---------------|------|---------------------|
-| POST   | `/register`   | No   | Create account      |
-| POST   | `/login`      | No   | Login, get token    |
-| GET    | `/me`         | Yes  | Get my profile      |
-| PUT    | `/me`         | Yes  | Update name/password|
+### Notifications  `/api/notifications`
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/` | User | Get my notifications (supports `?unreadOnly=true&page=1&limit=20`) |
+| GET | `/unread-count` | User | Count of unread notifications |
+| PATCH | `/read-all` | User | Mark all notifications as read |
+| PATCH | `/:id/read` | User | Mark one notification as read |
+| DELETE | `/:id` | User | Delete a notification |
 
-### Products — `/api/products`
-| Method | Endpoint       | Auth | Description               |
-|--------|---------------|------|---------------------------|
-| GET    | `/`           | No   | List all (with filters)   |
-| GET    | `/:id`        | No   | Get single product        |
-| GET    | `/user/my`    | Yes  | My listed products        |
-| POST   | `/`           | Yes  | Create product            |
-| PUT    | `/:id`        | Yes  | Update product (owner)    |
-| DELETE | `/:id`        | Yes  | Delete product (owner)    |
+### Payments  `/api/payments`
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/` | User | Record a payment (listing fee) |
+| GET | `/` | User | My payment history (supports `?status=COMPLETED`) |
+| GET | `/admin/all` | Admin | All payments across all users |
+| GET | `/:id` | User/Admin | Single payment detail |
 
-**Query params for GET /:** `?category=Electronics&search=phone&minPrice=10&maxPrice=100&page=1&limit=12`
-
-### Messages — `/api/messages` (all require auth)
-| Method | Endpoint                  | Description               |
-|--------|--------------------------|---------------------------|
-| POST   | `/`                      | Send a message            |
-| GET    | `/inbox`                 | My received messages      |
-| GET    | `/sent`                  | My sent messages          |
-| GET    | `/unread-count`          | Count of unread messages  |
-| GET    | `/conversation/:userId`  | Full chat with a user     |
-| DELETE | `/:id`                   | Delete a sent message     |
+### Approvals  `/api/approvals`
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/request` | User | Submit upload request for a product |
+| GET | `/my-requests` | User | My upload requests + status |
+| GET | `/pending` | Admin | All PENDING requests (review queue) |
+| GET | `/all` | Admin | All requests with optional filters |
+| POST | `/:requestId/review` | Admin | Approve or reject a request |
+| GET | `/:requestId` | User/Admin | Single request detail |
 
 ---
 
-## 🔐 Using JWT in Frontend
+## Typical seller workflow
 
-After login/register, store the token and send it in every protected request:
-
-```js
-// After login
-const { token } = await res.json();
-localStorage.setItem('token', token);
-
-// For protected requests
-fetch('http://localhost:5000/api/products', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  },
-  body: JSON.stringify({ name: 'My Product', price: 29.99 }),
-});
-```
-
----
-
-## 🛠️ Useful Commands
-
-```bash
-npm run db:studio    # Open Prisma Studio (visual DB browser)
-npm run db:migrate   # Apply new schema changes
-```
+1. Seller creates a product (`POST /api/products`)
+2. Seller submits upload request (`POST /api/approvals/request` with `productId`)
+3. Seller pays listing fee (`POST /api/payments` with `uploadRequestId`)
+4. Admin reviews queue (`GET /api/approvals/pending`)
+5. Admin approves/rejects (`POST /api/approvals/:requestId/review`)
+6. Seller receives a notification automatically

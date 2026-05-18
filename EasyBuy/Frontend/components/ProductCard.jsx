@@ -1,13 +1,33 @@
 import Image from "next/image";
+import Link from "next/link";
+
+const PLACEHOLDER = "https://placehold.co/800x520/e2e8f0/94a3b8?text=No+Image";
+
 export default function ProductCard({ product }) {
+  // Backend returns imageUrl; old hardcoded data used image — support both
+  const imageSrc = product.imageUrl || product.image || PLACEHOLDER;
+
+  // Backend returns category as an object { id, name } or plain string
+  const categoryName =
+    typeof product.category === "object" && product.category !== null
+      ? product.category.name
+      : product.category || "—";
+
+  // Backend returns seller as { id, name } object
+  const sellerName =
+    typeof product.seller === "object" && product.seller !== null
+      ? product.seller.name
+      : product.seller || "—";
+
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-md transition hover:-translate-y-1 hover:shadow-xl">
       <div className="relative h-52">
         <Image
           fill
-          src={product.image}
+          src={imageSrc}
           alt={product.name}
           className="object-cover"
+          unoptimized // allows external URLs without next.config domain whitelist
         />
       </div>
 
@@ -19,18 +39,29 @@ export default function ProductCard({ product }) {
           </span>
         </div>
 
-        <p className="mt-2 text-sm text-slate-600">{product.description}</p>
+        {product.description && (
+          <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+            {product.description}
+          </p>
+        )}
 
         <div className="mt-4 space-y-1 text-sm text-slate-500">
-          <p>Category: {product.category}</p>
-          <p>Condition: {product.condition}</p>
-          <p>Location: {product.location}</p>
-          <p>Seller: {product.seller}</p>
+          {categoryName !== "—" && <p>Category: {categoryName}</p>}
+          {product.condition && <p>Condition: {product.condition}</p>}
+          {sellerName !== "—" && <p>Seller: {sellerName}</p>}
+          {product.stock !== undefined && (
+            <p className={product.stock === 0 ? "text-red-500" : ""}>
+              {product.stock === 0 ? "Out of stock" : `Stock: ${product.stock}`}
+            </p>
+          )}
         </div>
 
-        <button className="mt-5 w-full rounded-lg bg-blue-700 py-2 font-semibold text-white hover:bg-blue-800">
+        <Link
+          href={`/chat?userId=${product.sellerId || product.seller?.id || ""}&userName=${encodeURIComponent(sellerName)}`}
+          className="mt-5 block w-full rounded-lg bg-blue-700 py-2 text-center font-semibold text-white hover:bg-blue-800"
+        >
           Contact Seller
-        </button>
+        </Link>
       </div>
     </div>
   );
