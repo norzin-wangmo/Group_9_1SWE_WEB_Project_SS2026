@@ -12,17 +12,22 @@ const { protect } = require('../middleware/authMiddleware');
 const validate = require('../middleware/validateMiddleware');
 const { createProductSchema, updateProductSchema } = require('../validation/schemas');
 
-// Public routes
+// Mount product image sub-router FIRST (before /:id) to avoid route conflicts
+// Produces: GET/POST /api/products/:productId/images
+//           PATCH/DELETE /api/products/:productId/images/:imageId
+const productImageRoutes = require('./productImageRoutes');
+router.use('/:productId/images', productImageRoutes);
+
+// ─── Public ───────────────────────────────────────────────────────────────────
 router.get('/', getAllProducts);
 
-// NOTE: /user/my MUST be declared before /:id, otherwise Express matches
-// the string "user" as a product ID and calls getProductById instead.
+// NOTE: /user/my MUST be before /:id so Express doesn't treat "user" as an ID
 router.get('/user/my', protect, getMyProducts);
 router.get('/:id', getProductById);
 
-// Protected routes (must be logged in)
-router.post('/', protect, validate(createProductSchema), createProduct);
-router.put('/:id', protect, validate(updateProductSchema), updateProduct);
+// ─── Protected ────────────────────────────────────────────────────────────────
+router.post(  '/',    protect, validate(createProductSchema), createProduct);
+router.put(   '/:id', protect, validate(updateProductSchema), updateProduct);
 router.delete('/:id', protect, deleteProduct);
 
 module.exports = router;
